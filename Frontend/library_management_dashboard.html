@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management Dashboard | Read Radar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Use the same configuration for consistency
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-blue': '#1e88e5',
+                        'accent-orange': '#ff9800',
+                        'success-green': '#4CAF50',
+                    }
+                }
+            }
+        }
+        
+        // Simple theme toggle for this page
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+
+        // Redirect back to the main login/dashboard
+        function goBackToDashboard() {
+            window.location.assign('dashboard.html');
+        }
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen flex flex-col font-sans transition-colors duration-300">
+    
+    <header class="shadow-md dark:shadow-xl bg-white dark:bg-gray-800 p-4 sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-green-600 dark:text-green-400">
+                Library Management Portal
+            </h1>
+            <div class="flex items-center space-x-4">
+                <button onclick="goBackToDashboard()" class="px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-blue-700 transition duration-150">
+                    Exit Admin View
+                </button>
+                <button id="theme-toggle" onclick="toggleTheme()" class="p-2 rounded-full text-gray-700 dark:text-yellow-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition duration-150" aria-label="Toggle dark mode">
+                    <svg class="w-6 h-6 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                    <svg class="w-6 h-6 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-6 flex-grow w-full">
+        
+        <div class="border-b border-gray-300 dark:border-gray-700 mb-8">
+            <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                <a href="#" class="border-b-4 border-green-500 text-green-600 dark:text-green-400 whitespace-nowrap py-3 px-1 font-medium text-lg hover:text-green-700 transition duration-150">Book Inventory (7,500)</a>
+                <a href="#" class="border-b-4 border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200 whitespace-nowrap py-3 px-1 font-medium text-lg transition duration-150" onclick="alert('Viewing User Records - feature stub.')">User Records (12,000)</a>
+                <a href="#" class="border-b-4 border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200 whitespace-nowrap py-3 px-1 font-medium text-lg transition duration-150" onclick="alert('Viewing Overdue Reports - feature stub.')">Overdue Reports</a>
+            </nav>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-l-4 border-yellow-500">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Books in Stock</p>
+                <p class="text-4xl font-bold text-gray-900 dark:text-gray-100 mt-1">7,500</p>
+            </div>
+            
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-l-4 border-red-500">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Currently Overdue</p>
+                <p class="text-4xl font-bold text-red-600 dark:text-red-400 mt-1">158</p>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-l-4 border-primary-blue">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">New Users This Month</p>
+                <p class="text-4xl font-bold text-gray-900 dark:text-gray-100 mt-1">450</p>
+            </div>
+
+        </div>
+
+        <div class="mt-12 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Inventory Quick View</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Title</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Author</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total Copies</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Available</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">The Martian</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Andy Weir</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">20</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-success-green font-semibold">5</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-blue hover:text-blue-700 cursor-pointer" onclick="alert('Editing The Martian')">Edit</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">Sapiens</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Yuval Noah Harari</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">35</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-red-500 font-semibold">2</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-blue hover:text-blue-700 cursor-pointer" onclick="alert('Editing Sapiens')">Edit</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+    </main>
+
+    <footer class="p-4 bg-gray-100 dark:bg-gray-900 mt-auto text-center text-sm text-gray-500 dark:text-gray-400">
+        Read Radar © 2025. Management Portal.
+    </footer>
+
+</body>
+</html>

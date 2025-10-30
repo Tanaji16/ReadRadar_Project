@@ -1,0 +1,197 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Dashboard | Read Radar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-blue': '#1e88e5',
+                        'accent-orange': '#ff9800',
+                        'success-green': '#4CAF50',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col font-sans transition-colors duration-300">
+
+    <header class="p-6 md:p-10 flex justify-between items-center bg-transparent border-b border-gray-200 dark:border-gray-800">
+        <div class="flex items-center space-x-4">
+            <img 
+                src="Gemini_Generated_Image_6rqdmu6rqdmu6rqd.png" 
+                alt="Read Radar Logo" 
+                class="h-12 md:h-16 w-auto object-contain"
+                onerror="this.onerror=null; this.src='https://placehold.co/200x60/B0B0B0/ffffff?text=Read+Radar';"
+            >
+        </div>
+        <nav class="flex items-center space-x-4 md:space-x-6">
+            <a href="#" id="nav-home" class="text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-200 font-medium text-lg transition duration-150 transform hover:scale-110">Home</a>
+            <button id="theme-toggle" class="p-2 rounded-full text-gray-700 dark:text-yellow-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition duration-150 transform hover:scale-110" aria-label="Toggle dark mode">
+                <svg id="moon-icon" class="w-6 h-6 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <svg id="sun-icon" class="w-6 h-6 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
+        </nav>
+    </header>
+
+    <main id="main-content" class="flex-grow p-8 md:p-12"></main>
+    
+    <div id="message-box" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-2xl max-w-sm w-full text-center">
+            <p id="message-text" class="text-gray-800 dark:text-gray-100 mb-4"></p>
+            <button onclick="hideMessage()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition transform hover:scale-105">
+                OK
+            </button>
+        </div>
+    </div>
+    
+    <div id="cart-panel" class="fixed top-0 right-0 w-full sm:w-96 h-full bg-white dark:bg-gray-800 shadow-2xl overflow-y-auto transform translate-x-full">
+        <div id="cart-content">
+            <!-- Content filled by renderCart -->
+        </div>
+    </div>
+
+    <div id="mobile-otp-modal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-lg w-full">
+            <div class="p-6">
+                <div class="flex justify-between items-center border-b pb-4 mb-4 border-gray-200 dark:border-gray-700">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">Order Summary | <span id="checkout-item-count">0</span> item(s)</h3>
+                    <button onclick="closeMobileOtpModal()" class="text-gray-500 dark:text-gray-400 hover:text-red-500 transition transform hover:scale-110">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                
+                <div id="order-summary-content" class="mb-6 space-y-3"></div>
+                
+                <div class="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg">
+                    <h4 class="font-semibold text-gray-800 dark:text-gray-100 mb-3">Enter your mobile number to continue.</h4>
+                    <div class="flex">
+                        <input id="mobile-input" type="tel" placeholder="10-digit mobile number" class="flex-grow p-3 border border-gray-300 dark:border-gray-600 rounded-l-lg focus:outline-none dark:bg-gray-700 dark:text-gray-100 focus:ring-primary-blue focus:ring-2">
+                        <button onclick="simulateOtpSend()" class="px-6 py-3 bg-yellow-400 text-black font-semibold rounded-r-lg hover:bg-yellow-500 transition disabled:opacity-50" id="otp-send-button">
+                            Next
+                        </button>
+                    </div>
+                    <label class="flex items-center mt-2 text-sm text-gray-600 dark:text-gray-400">
+                        <input type="checkbox" checked class="rounded text-primary-blue mr-2">
+                        Notify me on orders & offers
+                    </label>
+                </div>
+
+                <div id="otp-input-area" class="mt-4 hidden">
+                    <h4 class="font-semibold text-gray-800 dark:text-gray-100 mb-3">Enter OTP sent to <span id="otp-target-mobile" class="text-primary-blue"></span></h4>
+                    <div class="flex">
+                        <input id="otp-input" type="text" placeholder="Enter OTP (Simulated: 1234)" class="flex-grow p-3 border border-gray-300 dark:border-gray-600 rounded-l-lg focus:outline-none dark:bg-gray-700 dark:text-gray-100 focus:ring-primary-blue focus:ring-2">
+                        <button onclick="verifyOtp()" class="px-6 py-3 bg-success-green text-white font-semibold rounded-r-lg hover:bg-green-700 transition transform hover:scale-[1.02]">
+                            Verify
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="contact-details-modal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-lg w-full overflow-y-auto max-h-[90vh]">
+            <div class="p-6">
+                <div class="flex justify-between items-center border-b pb-4 mb-4 border-gray-200 dark:border-gray-700">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">Contact Details</h3>
+                    <button onclick="closeContactDetailsModal()" class="text-gray-500 dark:text-gray-400 hover:text-red-500 transition transform hover:scale-110">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                
+                <div class="mb-8 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <h4 class="font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-primary-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                        Contact Details
+                    </h4>
+                    <div class="space-y-4">
+                        <div class="mb-4">
+                            <label for="checkout-mobile" class="block text-sm font-medium text-gray-700 dark:text-gray-300">MOBILE NUMBER</label>
+                            <input id="checkout-mobile" type="tel" value="" readonly class="mt-1 w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-gray-100">
+                        </div>
+                        <div>
+                            <label for="full-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">FULL NAME</label>
+                            <input id="full-name" type="text" placeholder="Enter Your Name" class="mt-1 w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-blue dark:bg-gray-700 dark:text-gray-100">
+                        </div>
+                        <div>
+                            <label for="email-id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">EMAIL ADDRESS</label>
+                            <input id="email-id" type="email" placeholder="Enter Your Email Id" class="mt-1 w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-blue dark:bg-gray-700 dark:text-gray-100">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <h4 class="font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-primary-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        Recipient Address
+                    </h4>
+                    <label for="pincode" class="block text-sm font-medium text-gray-700 dark:text-gray-300">PIN CODE</label>
+                    <input id="pincode" type="text" placeholder="Enter pincode" class="mt-1 w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-blue dark:bg-gray-700 dark:text-gray-100">
+                </div>
+
+                <button 
+                    onclick="submitOrder()" 
+                    class="w-full py-3 bg-yellow-400 text-black font-semibold rounded-lg hover:bg-yellow-500 transition transform hover:scale-[1.01]"
+                >
+                    SUBMIT
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="profile-panel" class="fixed top-0 right-0 w-full sm:w-80 h-full bg-white dark:bg-gray-800 shadow-2xl overflow-y-auto transform translate-x-full transition-transform duration-300 z-50">
+        <div id="profile-content">
+            <!-- Content filled by renderProfilePanel -->
+        </div>
+    </div>
+
+    <footer class="p-4 bg-gray-50 dark:bg-gray-900 mt-auto">
+    </footer>
+
+    <!-- Load JavaScript Modules -->
+    <script>
+        // Define global functions for quick access in HTML onclick attributes
+        const navigate = (view) => window.App.navigate(view);
+        const logout = () => window.App.logout();
+        const toggleTheme = () => window.App.toggleTheme();
+        const showMessage = (msg) => window.App.showMessage(msg);
+        const hideMessage = () => window.App.hideMessage();
+        const toggleCartPanel = () => window.App.toggleCartPanel();
+        const openMobileOtpModal = () => window.App.openMobileOtpModal();
+        const closeMobileOtpModal = () => window.App.closeMobileOtpModal();
+        const simulateOtpSend = () => window.App.simulateOtpSend();
+        const verifyOtp = () => window.App.verifyOtp();
+        const closeContactDetailsModal = () => window.App.closeContactDetailsModal();
+        const submitOrder = () => window.App.submitOrder();
+        const toggleProfilePanel = () => window.App.toggleProfilePanel();
+
+        // Cart and Wishlist functions needed globally in views/explore.js
+        const addItemToCart = (id) => window.App.addItemToCart(id);
+        const addItemToWishlist = (id) => window.App.addItemToWishlist(id);
+        const removeItemFromWishlist = (id) => window.App.removeItemFromWishlist(id);
+        const addItemToCartFromWishlist = (id) => window.App.addItemToCartFromWishlist(id);
+        const updateCartQuantity = (id, delta) => window.App.updateCartQuantity(id, delta);
+        const goToSlide = (index) => window.App.goToSlide(index);
+
+    </script>
+    <script type="module" src="app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,514 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login and Signup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Set initial theme preference based on localStorage
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // Define custom colors/fonts
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-blue': '#1e88e5',
+                        'accent-orange': '#ff9800',
+                        'success-green': '#4CAF50', 
+                        'weak-red': '#f44336', // Added for password meter
+                        'medium-orange': '#ff9800', // Re-used accent-orange
+                        'strong-green': '#4CAF50', // Re-used success-green
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        .select-role-input {
+            cursor: pointer;
+            text-overflow: ellipsis;
+        }
+        
+        /* Darker, defined input placeholder styles */
+        .dark input::placeholder {
+            color: #6b7280;
+        }
+        input::placeholder {
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col font-sans transition-colors duration-300">
+
+    <header class="p-6 md:p-10 flex justify-between items-center bg-transparent">
+        <div class="flex items-center space-x-4">
+            <img 
+                src="Gemini_Generated_Image_6rqdmu6rqdmu6rqd.png" 
+                alt="Read Radar Logo" 
+                class="h-16 md:h-20 w-auto object-contain"
+                onerror="this.onerror=null; this.src='https://placehold.co/200x60/B0B0B0/ffffff?text=Read+Radar';"
+            >
+        </div>
+
+        <nav class="flex items-center space-x-4 md:space-x-6">
+            <a href="#" class="text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-200 font-medium text-lg transition duration-150">Home</a>
+            
+            <button id="theme-toggle" class="p-2 rounded-full text-gray-700 dark:text-yellow-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition duration-150 transform hover:scale-110" aria-label="Toggle dark mode">
+                <svg id="moon-icon" class="w-6 h-6 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <svg id="sun-icon" class="w-6 h-6 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
+        </nav>
+    </header>
+
+    <main class="flex-grow flex items-start justify-center p-8 md:p-16">
+        <div class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24">
+
+            <div class="flex flex-col items-center text-center p-6 md:p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-xl transition duration-300 hover:shadow-xl dark:hover:shadow-2xl">
+                <h2 class="text-2xl md:text-3xl font-bold tracking-wider mb-2 text-gray-800 dark:text-gray-100">
+                    NEW USER
+                </h2>
+                <div class="h-1 w-1/4 bg-accent-orange mb-6"></div>
+                
+                <p class="text-gray-600 dark:text-gray-400 mb-6 md:mb-8 text-lg">
+                    Don't have an Account Yet?
+                </p>
+                
+                <button 
+                    class="px-8 py-3 bg-primary-blue text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300 transform hover:scale-105 active:scale-100 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-600"
+                    onclick="openSignupModal()"
+                >
+                    Sign up
+                </button>
+            </div>
+
+            <div class="flex flex-col items-center text-center p-6 md:p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-xl transition duration-300 hover:shadow-xl dark:hover:shadow-2xl">
+                <h2 class="text-2xl md:text-3xl font-bold tracking-wider mb-2 text-gray-800 dark:text-gray-100">
+                    EXISTING USER
+                </h2>
+                <div class="h-1 w-1/4 bg-accent-orange mb-6"></div>
+
+                <p class="text-gray-600 dark:text-gray-400 mb-6 text-lg">
+                    Login to your Account
+                </p>
+
+                <div class="w-full max-w-xs relative mb-4">
+                    <input 
+                        type="text" 
+                        id="role-input"
+                        placeholder="Select Role" 
+                        class="select-role-input w-full px-4 py-3 border-2 border-blue-500 text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-200 shadow-sm"
+                        readonly
+                        value="Select Role"
+                        onclick="toggleDropdown()"
+                    >
+                    
+                    <div id="role-dropdown" class="absolute w-full mt-2 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hidden z-10">
+                        <div 
+                            class="px-4 py-3 text-base text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer rounded-t-lg transition-colors duration-150"
+                            onclick="selectRole('Admin/Spoc/Educator')"
+                        >
+                            Admin/Spoc/Educator
+                        </div>
+                        <div 
+                            class="px-4 py-3 text-base text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer rounded-b-lg transition-colors duration-150"
+                            onclick="selectRole('Student')"
+                        >
+                            Student
+                        </div>
+                    </div>
+                </div>
+
+                <div id="email-step" class="w-full max-w-xs transition-opacity duration-500 opacity-100">
+                    <input 
+                        type="email" 
+                        id="email-input"
+                        placeholder="Enter Email Address" 
+                        class="w-full px-4 py-3 mb-4 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-200 shadow-sm"
+                    >
+                    <button 
+                        class="w-full px-8 py-3 bg-primary-blue text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300 transform hover:scale-105 active:scale-100 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-600"
+                        onclick="showPasswordStep()"
+                    >
+                        Next
+                    </button>
+                </div>
+                
+                <div id="password-step" class="w-full max-w-xs transition-opacity duration-500 opacity-0 hidden">
+    <input 
+        type="password" 
+        id="password-input"
+        placeholder="Enter Password" 
+        class="w-full px-4 py-3 mb-4 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-200 shadow-sm"
+    >
+    <button 
+        class="w-full px-8 py-3 bg-primary-blue text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300 transform hover:scale-105 active:scale-100 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-600"
+        onclick="handleLogin()"
+    >
+        Login
+    </button>
+</div>
+            </div>
+
+        </div>
+    </main>
+    
+    <div id="message-box" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-2xl max-w-sm w-full text-center">
+            <p id="message-text" class="text-gray-800 dark:text-gray-100 mb-4"></p>
+            <button onclick="hideMessage()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition transform hover:scale-105">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <div id="signup-modal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full">
+            <div class="p-8">
+                <div class="flex justify-between items-center border-b pb-4 mb-6 border-gray-200 dark:border-gray-700">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Create New Account</h3>
+                    <button onclick="closeSignupModal()" class="text-gray-500 dark:text-gray-400 hover:text-red-500 transition transform hover:scale-110">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Join Read Radar as a **Student**.</p>
+                    
+                    <input type="text" id="signup-name" placeholder="Full Name" 
+                           class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue dark:bg-gray-700 dark:text-gray-100 shadow-sm">
+                    
+                    <input type="email" id="signup-email" placeholder="Email Address" 
+                           class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue dark:bg-gray-700 dark:text-gray-100 shadow-sm">
+
+                    <input type="password" id="signup-password" placeholder="Create Password" 
+                           onkeyup="updatePasswordStrength()"
+                           class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue dark:bg-gray-700 dark:text-gray-100 shadow-sm">
+                    
+                    <div class="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-600">
+                        <div id="password-strength-bar" class="h-2 rounded-full transition-all duration-300" style="width: 0%;"></div>
+                    </div>
+                    <p id="password-feedback" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Use 8+ characters with mixed case, numbers, and symbols.
+                    </p>
+                    
+                    <button 
+                        class="w-full mt-6 px-8 py-3 bg-accent-orange text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-yellow-300"
+                        onclick="handleSignup()"
+                    >
+                        Register Account
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="p-4 bg-gray-50 dark:bg-gray-900 mt-auto">
+    </footer>
+
+    <script>
+        let selectedRole = 'Select Role';
+        const SPINNER_ICON = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+
+        // --- Utility Functions ---
+        function showMessage(message) {
+            document.getElementById('message-text').innerText = message;
+            document.getElementById('message-box').classList.remove('hidden');
+            document.getElementById('message-box').classList.add('flex');
+        }
+
+        function hideMessage() {
+            document.getElementById('message-box').classList.add('hidden');
+            document.getElementById('message-box').classList.remove('flex');
+        }
+
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        // --- LOGIN/ROLE Functions ---
+        function toggleDropdown() {
+            document.getElementById('role-dropdown').classList.toggle('hidden');
+        }
+
+        function selectRole(role) {
+            selectedRole = role;
+            document.getElementById('role-input').value = role;
+            toggleDropdown();
+        }
+        
+        window.onclick = function(event) {
+            if (!event.target.matches('.select-role-input')) {
+                const dropdown = document.getElementById('role-dropdown');
+                if (dropdown && !dropdown.classList.contains('hidden')) {
+                    dropdown.classList.add('hidden');
+                }
+            }
+        }
+        
+        function showPasswordStep() {
+            const email = document.getElementById('email-input').value;
+            if (selectedRole === 'Select Role') {
+                showMessage('Please select a role before proceeding.');
+                return;
+            }
+            if (!email || !email.includes('@')) {
+                showMessage('Please enter a valid email address.');
+                return;
+            }
+
+            const otpButton = document.querySelector('#email-step button');
+            const originalText = otpButton.innerText;
+            otpButton.innerHTML = `${SPINNER_ICON} Sending...`;
+            otpButton.disabled = true;
+            otpButton.classList.add('flex', 'items-center', 'justify-center');
+
+            setTimeout(() => {
+                otpButton.innerHTML = originalText;
+                otpButton.disabled = false;
+                otpButton.classList.remove('flex', 'items-center', 'justify-center');
+
+                document.getElementById('email-step').classList.add('opacity-0');
+                setTimeout(() => {
+                    document.getElementById('email-step').classList.add('hidden');
+                    document.getElementById('password-step').classList.remove('hidden');
+                    document.getElementById('password-step').classList.add('opacity-100');
+                    showMessage(`Simulated OTP sent to ${email}. Enter any text to proceed.`);
+                }, 300);
+            }, 500);
+        }
+        
+        // REPLACE your old handleLogin function with this new one
+async function handleLogin() {
+    const email = document.getElementById('email-input').value;
+    const password = document.getElementById('password-input').value; // Get value from new password field
+    const loginButton = document.querySelector('#password-step button'); // Get the correct button
+    const originalText = loginButton.innerText;
+
+    if (!password) {
+        showMessage('Please enter your password.');
+        return;
+    }
+
+    // --- 1. Start Loading State ---
+    loginButton.innerHTML = `${SPINNER_ICON} Logging in...`;
+    loginButton.disabled = true;
+    loginButton.classList.add('flex', 'items-center', 'justify-center');
+
+    const loginData = {
+        email: email,
+        password: password
+    };
+
+    // --- 2. The API Call ---
+    try {
+        const response = await fetch('http://localhost:8080/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(loginData)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            // 'result.message' comes from the backend's error response
+            throw new Error(result.message || 'Login failed');
+        }
+
+        // --- 3. Handle Success ---
+        // 'result.token' comes from the backend's LoginResponse
+        console.log("Login successful, token:", result.token);
+
+        // THIS IS THE MOST IMPORTANT PART:
+        // Save the token and user info so other pages can use it
+        localStorage.setItem('userToken', result.token);
+        localStorage.setItem('userEmail', email);
+        localStorage.setItem('userRole', selectedRole);
+
+        // Redirect to the dashboard
+        window.location.assign('dashboard.html');
+
+    } catch (error) {
+        // --- 4. Handle Failure ---
+        console.error('Login error:', error);
+        showMessage(error.message); // Show the specific error (e.g., "Invalid email or password")
+    } finally {
+        // --- 5. Stop Loading State ---
+        loginButton.innerHTML = originalText;
+        loginButton.disabled = false;
+        loginButton.classList.remove('flex', 'items-center', 'justify-center');
+    }
+}
+
+        // --- PASSWORD STRENGTH LOGIC (NEW) ---
+
+        // Function to check password strength and return a score (0-3)
+        function checkPasswordStrength(password) {
+            let score = 0;
+            if (password.length > 7) score++; // Length > 8
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++; // Mixed case
+            if (/\d/.test(password) || /[^A-Za-z0-9]/.test(password)) score++; // Numbers or Symbols
+            
+            // Adjust score if conditions are met for a stronger password
+            if (score === 3 && password.length > 10) score = 4;
+
+            return score;
+        }
+
+        function updatePasswordStrength() {
+            const password = document.getElementById('signup-password').value;
+            const bar = document.getElementById('password-strength-bar');
+            const feedback = document.getElementById('password-feedback');
+            const score = checkPasswordStrength(password);
+
+            // Reset classes
+            bar.className = 'h-2 rounded-full transition-all duration-300';
+            
+            if (password.length === 0) {
+                bar.style.width = '0%';
+                feedback.innerText = 'Use 8+ characters with mixed case, numbers, and symbols.';
+                feedback.className = 'text-xs text-gray-500 dark:text-gray-400 mt-1';
+                return;
+            }
+
+            if (score === 1) {
+                bar.style.width = '33%';
+                bar.classList.add('bg-weak-red');
+                feedback.innerText = 'Weak: Try adding numbers and symbols.';
+                feedback.classList.add('text-weak-red', 'font-semibold');
+            } else if (score === 2 || score === 3) {
+                bar.style.width = '66%';
+                bar.classList.add('bg-medium-orange');
+                feedback.innerText = 'Medium: Add more complexity for a Strong rating.';
+                feedback.classList.add('text-medium-orange', 'font-semibold');
+            } else if (score === 4) {
+                bar.style.width = '100%';
+                bar.classList.add('bg-strong-green');
+                feedback.innerText = 'Strong: Password is secure.';
+                feedback.classList.add('text-strong-green', 'font-semibold');
+            } else {
+                bar.style.width = '10%';
+                bar.classList.add('bg-weak-red');
+                feedback.innerText = 'Very Weak: Password is too short.';
+                feedback.classList.add('text-weak-red', 'font-semibold');
+            }
+        }
+
+
+        // --- SIGNUP Functions ---
+        function openSignupModal() {
+            document.getElementById('signup-modal').classList.remove('hidden');
+            document.getElementById('signup-modal').classList.add('flex');
+            
+            // Clear fields and strength indicator on open
+            document.getElementById('signup-name').value = '';
+            document.getElementById('signup-email').value = '';
+            document.getElementById('signup-password').value = '';
+            document.getElementById('password-strength-bar').style.width = '0%';
+            document.getElementById('password-feedback').innerText = 'Use 8+ characters with mixed case, numbers, and symbols.';
+            document.getElementById('password-feedback').className = 'text-xs text-gray-500 dark:text-gray-400 mt-1';
+        }
+
+        function closeSignupModal() {
+            document.getElementById('signup-modal').classList.add('hidden');
+            document.getElementById('signup-modal').classList.remove('flex');
+        }
+
+        // REPLACE your old handleSignup function with this new one
+async function handleSignup() {
+    const name = document.getElementById('signup-name').value;
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const signupButton = document.querySelector('#signup-modal button:last-child'); // Use a more specific selector
+    const originalText = signupButton.innerText;
+    const passwordScore = checkPasswordStrength(password);
+
+    // --- 1. Validation (Same as your old code) ---
+    if (!name || !email || !password) {
+        showMessage('Please fill all required fields for registration.');
+        return;
+    }
+    if (!email.includes('@')) {
+        showMessage('Please enter a valid email address.');
+        return;
+    }
+    if (passwordScore < 2) { // Your old code had 'score < 2'
+        showMessage('Please choose a Medium or Strong password.');
+        return;
+    }
+
+    // --- 2. Start Loading State (Same as your old code) ---
+    signupButton.innerHTML = `${SPINNER_ICON} Registering...`;
+    signupButton.disabled = true;
+    signupButton.classList.add('flex', 'items-center', 'justify-center');
+
+    // This is the data object we will send to Spring Boot
+    const userData = {
+        name: name,
+        email: email,
+        password: password,
+        role: "Student" // We're registering all new users as 'Student'
+    };
+
+    // --- 3. The API Call (The new part) ---
+    try {
+        // Send the data to the backend
+        const response = await fetch('http://localhost:8080/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData) // Convert the JS object to a JSON string
+        });
+
+        // Get the response from the server (even if it's an error)
+        const result = await response.json();
+
+        if (!response.ok) {
+            // If the server sent an error (like "Email already taken!")
+            // 'result.message' comes from the Map.of("message", e.getMessage()) in your controller
+            throw new Error(result.message || 'Signup failed. Please try again.');
+        }
+
+        // --- 4. Handle Success ---
+        // 'result.message' comes from Map.of("message", "User registered successfully!")
+        closeSignupModal();
+        showMessage(result.message + ` Please log in.`);
+        document.getElementById('email-input').value = email; // Pre-fill email for login
+
+    } catch (error) {
+        // --- 5. Handle Failure ---
+        console.error('Signup error:', error);
+        showMessage(error.message); // Show the specific error from the backend
+    } finally {
+        // --- 6. Stop Loading State (Always runs) ---
+        // This runs whether the signup succeeded or failed
+        signupButton.innerHTML = originalText;
+        signupButton.disabled = false;
+        signupButton.classList.remove('flex', 'items-center', 'justify-center');
+    }
+}
+    </script>
+    
+
+</body>
+</html>

@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+body::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+body::-webkit-scrollbar-thumb {
+    background-color: #a0aec0;
+    border-radius: 4px;
+}
+.dark body::-webkit-scrollbar-thumb {
+    background-color: #4a5568;
+}
+body::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+.marquee-container {
+    overflow: hidden;
+    position: relative;
+}
+.marquee-content {
+    display: inline-block;
+    white-space: nowrap;
+    padding-left: 100%; 
+    animation: marquee-scroll 15s linear infinite;
+}
+@keyframes marquee-scroll {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-100%, 0); }
+}
+
+.dark .strikethrough { color: #d1d5db; }
+.strikethrough { text-decoration: line-through; color: #6b7280; }
+
+#cart-panel {
+    transition: right 0.3s ease-in-out;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    z-index: 40;
+}
+
+.carousel-container { position: relative; overflow: hidden; }
+.carousel-slides { display: flex; transition: transform 0.5s ease-in-out; }
+.carousel-slide { flex: 0 0 100%; }
