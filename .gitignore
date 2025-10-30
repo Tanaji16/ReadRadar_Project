@@ -1,0 +1,13 @@
+# VS Code settings
+.vscode/
+
+# Java / Maven build files
+/backend/myproject/target/
+*.jar
+
+# Log files
+*.log
+
+# Operating System files
+.DS_Store
+Thumbs.db
