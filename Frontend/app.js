@@ -1,29 +1,26 @@
-
-
 import * as State from './state.js';
 import { renderView } from './router.js';
 import { apiSendOtp, apiPlaceOrder } from './api.js';
 
 const SPINNER_ICON = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
 
-function init() {
-    // Auth Check
-    if (!State.userRole || !State.userEmail) {
-        try {
-            window.location.assign('/'); 
-        } catch (e) {
-            console.error("Authentication failed. Manual login required:", e);
-        }
-    }
+// --- 1. ALL FUNCTIONS ARE DEFINED FIRST ---
 
+function init() {
+    // This runs after the page loads
     if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
     }
 
+    // Bind header buttons
     document.getElementById('nav-home').addEventListener('click', () => navigate('dashboard'));
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     
-    renderView(State.currentView);
+    // Fetch books from our secure backend
+    fetchBooks(); 
+    
+    // Render the initial view
+    renderView('dashboard'); 
 }
 
 export function navigate(viewName) {
@@ -40,6 +37,10 @@ export function navigate(viewName) {
 }
 
 export function logout() {
+    console.log("Logging out...");
+    
+    // This is the correct, secure logout
+    localStorage.removeItem('userToken');
     localStorage.removeItem('userRole');
     localStorage.removeItem('userEmail');
     localStorage.removeItem('cartItems');
@@ -165,7 +166,7 @@ export function renderCart() {
                         <button class="px-3 py-1 bg-black text-white rounded-md text-xs hover:bg-gray-700 transition transform hover:scale-[1.02]">VIEW ></button>
                     </div>
                     <div class="flex-shrink-0 w-full p-3 flex items-center justify-between text-sm text-gray-700 dark:text-gray-200">
-                        <svg class="w-6 h-6 mr-2 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.228C11.371 1.77 12.01 1.77 12.332 2.228l.583.821c.21.296.545.497.915.553l.89.127c.48.068.748.6.438 1.03l-.68.91c-.19.255-.306.577-.306.915v.987c0 .415.166.81.438 1.135l.821.583c.458.322.458.961 0 1.283l-.821.583c-.272.193-.438.583-.438.998v.987c0 .338-.116.66-.306.915l-.68.91c-.31.438-.042.977.438 1.03l.89.127c.37.056.705.257.915.553l.583.821c.322.458.961.458 1.283 0l.583-.821c.21-.296.545-.497.915-.553l.89-.127c.48-.068.748-.6.438-1.03l-.68-.91c-.19-.255-.306-.577-.306-.915V13.04c0-.415.166-.81.438-1.135l.821-.583c.458-.322.458-.961 0-1.283l-.821-.583c-.272-.193-.438-.583-.438-.998V8.95c0-.338-.116-.66-.306-.915l-.68-.91c-.31-.438-.042-.977.438-1.03l.89-.127c-.37-.056-.705-.257-.915-.553l-.583-.821c-.322-.458-.322-.458 0 0z" /></svg>
+                        <svg class="w-6 h-6 mr-2 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.228C11.371 1.77 12.01 1.77 12.332 2.228l.583.821c.21.296.545.497.915.553l.89.127c.48.068.748.6.438 1.03l-.68.91c-.19.255-.306.577-.306.915v.987c0 .415.166.81.438 1.135l.821.583c.458.322.458.961 0 1.283l-.821.583c-.272.193-.438.583-.438.998v.987c0 .338-.116.66-.306.915l-.68.91c-.31.438-.042.977.438 1.03l.89.127c.37.056.705.257.915.553l.583.821c.322.458.961.458 1.283 0l.583-.821c.21-.296.545-.497.915-.553l.89-.127c.48-.068.748-.6.438-1.03l-.68-.91c-.19-.255-.306-.577-.306-.915V13.04c0-.415.166-.81.438-1.135l.821-.583c.458-.322.458-.961 0-1.283l-.821-.583c-.272-.193-.438-.583-.438-.998V8.95c0-.338-.116.66-.306.915l-.68-.91c-.31-.438-.042-.977.438-1.03l.89-.127c-.37-.056-.705-.257-.915-.553l-.583-.821c-.322-.458-.322-.458 0 0z" /></svg>
                         <span class="font-semibold">Get brand gift cards up to $\text{\textcurrency}400$!</span>
                         <button class="px-3 py-1 bg-black text-white rounded-md text-xs hover:bg-gray-700 transition transform hover:scale-[1.02]">VIEW ></button>
                     </div>
@@ -230,6 +231,10 @@ export function renderCart() {
 
 export function addItemToCart(bookId) {
     const book = State.books.find(b => b.id === bookId);
+    if (!book) {
+        console.error("Book not found:", bookId);
+        return;
+    }
     const existingItem = State.cartItems.find(item => item.id === bookId);
     let newCart;
 
@@ -255,11 +260,12 @@ export function removeItemFromCart(bookId) {
     renderCart();
 }
 
-// ... (Rest of app.js functions remain the same)
-// Note: You must ensure the rest of your app.js file (especially functions not shown here, like init, navigate, and all the exports) are present immediately after this code block.
-
 export function addItemToWishlist(bookId) {
     const book = State.books.find(b => b.id === bookId);
+     if (!book) {
+        console.error("Book not found:", bookId);
+        return;
+    }
     const existingItem = State.wishlistItems.find(item => item.id === bookId);
 
     if (!existingItem) {
@@ -448,9 +454,46 @@ export function goToSlide(index) {
     State.updateCarouselSlide(index);
 }
 
+// This is our new, correct function
+async function fetchBooks() { 
+    const token = localStorage.getItem('userToken');
+    if (!token) {
+        console.error("No token found. Cannot fetch books.");
+        return;
+    }
 
-document.addEventListener('DOMContentLoaded', init);
+    try {
+        // 1. Call your new /api/books endpoint
+        const response = await fetch('http://localhost:8080/api/books', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+            }
+        });
 
+        if (!response.ok) {
+            throw new Error(`Server responded with status: ${response.status}`);
+        }
+
+        const bookData = await response.json();
+        
+        // 2. THIS IS THE NEW PART:
+        // Save the real books into your central state
+        State.updateBooks(bookData); // <-- THIS IS LINE 522
+        console.log("Successfully fetched and stored books:", State.books);
+        
+        // 3. Re-render the current view just in case
+        //    (this will update 'Explore Books' if you are on it)
+        
+
+    } catch (error) {
+        console.error('Error fetching books:', error);
+        showMessage('Could not get books from the library. Please try again.');
+    }
+}
+
+// --- 2. THE `window.App` OBJECT IS CREATED *AFTER* FUNCTIONS ARE DEFINED ---
 window.App = {
     navigate,
     logout,
@@ -476,5 +519,10 @@ window.App = {
     updateCartOfferCarousel,
     nextCartOfferSlide,
     goToSlide,
-    renderCart
+    renderCart,
+    fetchBooks, // <-- This is added
+    updateBooks: State.updateBooks // <-- We must add updateBooks here
 };
+
+// --- 3. THE SCRIPT STARTS ---
+document.addEventListener('DOMContentLoaded', init);

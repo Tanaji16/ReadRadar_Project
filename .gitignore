@@ -11,3 +11,6 @@
 # Operating System files
 .DS_Store
 Thumbs.db
+# Database files
+*.mv.db
+*.trace.db

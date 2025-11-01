@@ -21,15 +21,8 @@ export let cartOfferSlide = 0;
 export const cartOffers = 2;
 
 // Mock Data
-export const books = [
-    { id: 1, title: "The Martian", author: "Andy Weir", price: 50, originalPrice: 100, img: 'https://m.media-amazon.com/images/I/91tK4v9M5uL._AC_UF1000,1000_QL80_.jpg' },
-    { id: 2, title: "Educated", author: "Tara Westover", price: 50, originalPrice: 100, img: 'https://images.thgim.com/migration_catalog/article13903102.ece/alternates/FREE_1200/educated' },
-    { id: 3, title: "Atomic Habits", author: "James Clear", price: 50, originalPrice: 100, img: 'https://m.media-amazon.com/images/I/51-uspgjBGL.jpg' },
-    { id: 4, title: "Project Hail Mary", author: "Andy Weir", price: 50, originalPrice: 100, img: 'https://m.media-amazon.com/images/I/91L1mX+5eXL._AC_UF1000,1000_QL80_.jpg' },
-    { id: 5, title: "The Great Gatsby", author: "F. Scott Fitzgerald", price: 50, originalPrice: 100, img: 'https://m.media-amazon.com/images/I/81e5K6RjQHL.jpg' },
-    { id: 6, title: "Sapiens", author: "Yuval Noah Harari", price: 50, originalPrice: 100, img: 'https://m.media-amazon.com/images/I/713jQmtB6uL._AC_UF1000,1000_QL80_.jpg' },
-];
-
+// This is our new, empty array, ready for REAL data
+export let books = [];
 export const carouselImages = [
     { url: 'https://placehold.co/1200x400/1e88e5/ffffff?text=STUDENT+BONANZA%3A+Get+1+Free+Rental+on+3+Books', alt: 'Student Bonanza Offer' },
     { url: 'https://placehold.co/1200x400/ff9800/000000?text=50%25+OFF+All+Fiction+for+Freshers', alt: 'Fiction Fresher Offer' },
@@ -56,4 +49,8 @@ export function updateCartOffer(index) {
 }
 export function updateLoadingStatus(status) { 
     isLoading = status;
+}
+// ADD THIS FUNCTION
+export function updateBooks(newBooks) {
+     books = newBooks;
 }

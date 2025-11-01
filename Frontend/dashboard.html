@@ -5,6 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="page-title">Dashboard | Read Radar</title>
+    <script>
+        (function() {
+            // 1. Get the token from localStorage
+            const token = localStorage.getItem('userToken');
+
+            if (!token) {
+                // 2. If no token, kick them back to login.html
+                console.log("No token found. Redirecting to login.");
+                window.location.replace('login.html');
+            }
+            
+            // 3. If a token is found, let them in.
+            console.log("Token found. Access granted.");
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {

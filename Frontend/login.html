@@ -296,10 +296,12 @@
         }
         
         // REPLACE your old handleLogin function with this new one
+// REPLACE your old handleLogin function with this new one
+// REPLACE your old handleLogin function with this new one
 async function handleLogin() {
     const email = document.getElementById('email-input').value;
-    const password = document.getElementById('password-input').value; // Get value from new password field
-    const loginButton = document.querySelector('#password-step button'); // Get the correct button
+    const password = document.getElementById('password-input').value;
+    const loginButton = document.querySelector('#password-step button');
     const originalText = loginButton.innerText;
 
     if (!password) {
@@ -307,7 +309,6 @@ async function handleLogin() {
         return;
     }
 
-    // --- 1. Start Loading State ---
     loginButton.innerHTML = `${SPINNER_ICON} Logging in...`;
     loginButton.disabled = true;
     loginButton.classList.add('flex', 'items-center', 'justify-center');
@@ -317,7 +318,6 @@ async function handleLogin() {
         password: password
     };
 
-    // --- 2. The API Call ---
     try {
         const response = await fetch('http://localhost:8080/api/login', {
             method: 'POST',
@@ -330,29 +330,23 @@ async function handleLogin() {
         const result = await response.json();
 
         if (!response.ok) {
-            // 'result.message' comes from the backend's error response
             throw new Error(result.message || 'Login failed');
         }
 
-        // --- 3. Handle Success ---
-        // 'result.token' comes from the backend's LoginResponse
-        console.log("Login successful, token:", result.token);
-
-        // THIS IS THE MOST IMPORTANT PART:
-        // Save the token and user info so other pages can use it
+        // --- THIS IS THE CRITICAL FIX ---
+        // We must save all three items!
         localStorage.setItem('userToken', result.token);
         localStorage.setItem('userEmail', email);
         localStorage.setItem('userRole', selectedRole);
+        // --- END OF FIX ---
 
         // Redirect to the dashboard
         window.location.assign('dashboard.html');
 
     } catch (error) {
-        // --- 4. Handle Failure ---
         console.error('Login error:', error);
-        showMessage(error.message); // Show the specific error (e.g., "Invalid email or password")
+        showMessage(error.message);
     } finally {
-        // --- 5. Stop Loading State ---
         loginButton.innerHTML = originalText;
         loginButton.disabled = false;
         loginButton.classList.remove('flex', 'items-center', 'justify-center');

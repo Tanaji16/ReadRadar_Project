@@ -4,6 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Management Dashboard | Read Radar</title>
+
+    <!-- 
+      ▼▼▼ 1. THE "GUARD" SCRIPT ▼▼▼
+      This kicks out anyone who isn't logged in.
+    -->
+    <script>
+        (function() {
+            const token = localStorage.getItem('userToken');
+            if (!token) {
+                console.log("No token found. Redirecting to login.");
+                window.location.replace('login.html');
+            }
+            console.log("Token found. Admin access pending...");
+        })();
+    </script>
+    
+    <!-- 2. Tailwind and Font -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         // Use the same configuration for consistency
@@ -60,63 +77,132 @@
 
     <main class="max-w-7xl mx-auto p-6 flex-grow w-full">
         
-        <div class="border-b border-gray-300 dark:border-gray-700 mb-8">
-            <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                <a href="#" class="border-b-4 border-green-500 text-green-600 dark:text-green-400 whitespace-nowrap py-3 px-1 font-medium text-lg hover:text-green-700 transition duration-150">Book Inventory (7,500)</a>
-                <a href="#" class="border-b-4 border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200 whitespace-nowrap py-3 px-1 font-medium text-lg transition duration-150" onclick="alert('Viewing User Records - feature stub.')">User Records (12,000)</a>
-                <a href="#" class="border-b-4 border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200 whitespace-nowrap py-3 px-1 font-medium text-lg transition duration-150" onclick="alert('Viewing Overdue Reports - feature stub.')">Overdue Reports</a>
-            </nav>
+        <!-- 3. The "Access Denied" Message (Hidden by default) -->
+        <div id="access-denied" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-6 rounded-lg shadow-md mb-8" role="alert">
+            <h3 class="font-bold text-xl">Access Denied</h3>
+            <p class="mt-2">You must have an "Admin/Spoc/Educator" role to view this page. Students do not have permission to add or manage books.</p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-l-4 border-yellow-500">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Books in Stock</p>
-                <p class="text-4xl font-bold text-gray-900 dark:text-gray-100 mt-1">7,500</p>
-            </div>
-            
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-l-4 border-red-500">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Currently Overdue</p>
-                <p class="text-4xl font-bold text-red-600 dark:text-red-400 mt-1">158</p>
+        <!-- This is your existing dashboard content -->
+        <div id="admin-content">
+            <div class="border-b border-gray-300 dark:border-gray-700 mb-8">
+                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                    <a href="#" class="border-b-4 border-green-500 text-green-600 dark:text-green-400 whitespace-nowrap py-3 px-1 font-medium text-lg hover:text-green-700 transition duration-150">Book Inventory</a>
+                    <a href="#" class="border-b-4 border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200 whitespace-nowrap py-3 px-1 font-medium text-lg transition duration-150" onclick="alert('Viewing User Records - feature stub.')">User Records</a>
+                    <a href="#" class="border-b-4 border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200 whitespace-nowrap py-3 px-1 font-medium text-lg transition duration-150" onclick="alert('Viewing Overdue Reports - feature stub.')">Overdue Reports</a>
+                </nav>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-l-4 border-primary-blue">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">New Users This Month</p>
-                <p class="text-4xl font-bold text-gray-900 dark:text-gray-100 mt-1">450</p>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-l-4 border-yellow-500">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Books in Stock</p>
+                    <p class="text-4xl font-bold text-gray-900 dark:text-gray-100 mt-1">7,500</p>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-l-4 border-red-500">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Currently Overdue</p>
+                    <p class="text-4xl font-bold text-red-600 dark:text-red-400 mt-1">158</p>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-l-4 border-primary-blue">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">New Users This Month</p>
+                    <p class="text-4xl font-bold text-gray-900 dark:text-gray-100 mt-1">450</p>
+                </div>
             </div>
 
-        </div>
+            <!-- ▼▼▼ NEW "ADD BOOK" SECTION ▼▼▼ -->
+            <div class="mt-12 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 border-b pb-4 dark:border-gray-700">Add New Book to Library</h2>
+                
+                <form id="add-book-form" class="space-y-4">
+                    
+                    <!-- Title & Author -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Book Title</label>
+                            <input type="text" id="title" name="title" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label for="author" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Author</label>
+                            <input type="text" id="author" name="author" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                    </div>
 
-        <div class="mt-12 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Inventory Quick View</h2>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Title</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Author</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total Copies</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Available</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">The Martian</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Andy Weir</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">20</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-success-green font-semibold">5</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-blue hover:text-blue-700 cursor-pointer" onclick="alert('Editing The Martian')">Edit</td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">Sapiens</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Yuval Noah Harari</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">35</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-red-500 font-semibold">2</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-blue hover:text-blue-700 cursor-pointer" onclick="alert('Editing Sapiens')">Edit</td>
-                        </tr>
-                    </tbody>
-                </table>
+                    <!-- ISBN & Genre -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="isbn" class="block text-sm font-medium text-gray-700 dark:text-gray-300">ISBN</label>
+                            <input type="text" id="isbn" name="isbn" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                         <div>
+                            <label for="genre" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Genre</label>
+                            <input type="text" id="genre" name="genre" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <!-- Year, Quantity, Price, Original Price -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                            <label for="publicationYear" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Year</label>
+                            <input type="number" id="publicationYear" name="publicationYear" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                         <div>
+                            <label for="quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Quantity</label>
+                            <input type="number" id="quantity" name="quantity" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label for="price" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Price (₹)</label>
+                            <input type="number" id="price" name="price" step="0.01" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label for="originalPrice" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Original Price (₹)</label>
+                            <input type="number" id="originalPrice" name="originalPrice" step="0.01" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="pt-4 text-right">
+                        <button type="submit" id="submit-book-button" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                            Add Book
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <!-- ▲▲▲ END OF "ADD BOOK" SECTION ▲▲▲ -->
+
+
+            <div class="mt-12 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Inventory Quick View</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Title</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Author</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total Copies</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Available</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-table-body" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">The Martian</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Andy Weir</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">20</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-success-green font-semibold">5</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-blue hover:text-blue-700 cursor-pointer" onclick="alert('Editing The Martian')">Edit</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">Sapiens</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Yuval Noah Harari</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">35</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-red-500 font-semibold">2</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-blue hover:text-blue-700 cursor-pointer" onclick="alert('Editing Sapiens')">Edit</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
         
@@ -126,5 +212,211 @@
         Read Radar © 2025. Management Portal.
     </footer>
 
+    <!-- ▼▼▼ NEW JAVASCRIPT LOGIC ▼▼▼ -->
+    <!-- ▼▼▼ REPLACE YOUR OLD <script> BLOCK WITH THIS ▼▼▼ -->
+<!-- ▼▼▼ REPLACE YOUR OLD <script> BLOCK WITH THIS NEW ONE ▼▼▼ -->
+<script>
+    // --- 1. Main Setup ---
+    // This runs as soon as the page is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        // Get user role and token from Local Storage
+        const userRole = localStorage.getItem('userRole');
+        const token = localStorage.getItem('userToken');
+        const isAdmin = userRole && (userRole.includes('Admin') || userRole.includes('Educator') || userRole.includes('Spoc'));
+        
+        const adminContent = document.getElementById('admin-content');
+        const accessDenied = document.getElementById('access-denied');
+        const bookForm = document.getElementById('add-book-form');
+        const tableBody = document.getElementById('inventory-table-body'); // Get the table body
+
+        if (isAdmin && token) {
+            // User is an Admin, show the main content
+            adminContent.classList.remove('hidden');
+            accessDenied.classList.add('hidden');
+
+            console.log("Admin access granted. Initializing...");
+
+            // --- THIS IS THE FIX ---
+            // Load the real book data from the database
+            loadBooks(token);
+
+            // Attach listener for the "Add Book" form
+            if (bookForm) {
+                bookForm.addEventListener('submit', (event) => handleBookSubmit(event, token));
+            }
+
+            // Attach a single listener to the table to handle all delete clicks
+            if (tableBody) {
+                tableBody.addEventListener('click', (event) => handleDeleteClick(event, token));
+            }
+
+        } else {
+            // User is not an Admin, show the "Access Denied" message
+            console.warn("User is not an admin. Access denied.");
+            if (adminContent) adminContent.classList.add('hidden');
+            if (accessDenied) accessDenied.classList.remove('hidden');
+        }
+    });
+
+    // --- 2. Fetches all books and calls renderTable ---
+    async function loadBooks(token) {
+        try {
+            const response = await fetch('http://localhost:8080/api/books', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch books: ${response.status}`);
+            }
+
+            const books = await response.json();
+            renderBookTable(books); // Call the function to draw the table
+        } catch (error) {
+            console.error("Error loading books:", error);
+            alert("Could not load book inventory.");
+        }
+    }
+
+    // --- 3. Renders the list of books into the table ---
+    function renderBookTable(books) {
+        const tableBody = document.getElementById('inventory-table-body');
+        if (!tableBody) return;
+
+        // Clear the old, static table rows
+        tableBody.innerHTML = '';
+
+        if (books.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-gray-500 dark:text-gray-400">No books in inventory.</td></tr>';
+            return;
+        }
+
+        // Create a new row for each book
+        books.forEach(book => {
+            const available = book.quantity > 0 ? book.quantity : 0; 
+            const statusClass = book.quantity > 0 ? 'text-success-green' : 'text-red-500';
+
+            const row = `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">${book.title}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${book.author}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${book.quantity}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${statusClass}">${available}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <button class="text-primary-blue hover:text-blue-700 edit-btn" data-book-id="${book.id}">Edit</button>
+                        <button class="text-red-500 hover:text-red-700 delete-btn ml-4" data-book-id="${book.id}">Delete</button>
+                    </td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    // --- 4. Handles the click on any "Delete" button ---
+    async function handleDeleteClick(event, token) {
+        // Check if the clicked element is NOT a delete button
+        if (!event.target.classList.contains('delete-btn')) {
+            return; // Do nothing
+        }
+
+        const button = event.target;
+        const bookId = button.dataset.bookId;
+        const bookTitle = button.closest('tr').querySelector('td:first-child').innerText;
+
+        // Use confirm() for a simple Yes/No dialog
+        if (!confirm(`Are you sure you want to delete "${bookTitle}"?`)) {
+            return; // User clicked "Cancel"
+        }
+
+        try {
+            const response = await fetch(`http://localhost:8080/api/books/${bookId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server responded with status: ${response.status}`);
+            }
+
+            // If successful, show a success message and reload the book table
+            alert(`Successfully deleted "${bookTitle}".`);
+            loadBooks(token); // Refresh the table
+
+        } catch (error) {
+            console.error("Error deleting book:", error);
+            alert(`Error: Could not delete book. ${error.message}`);
+        }
+    }
+
+    // --- 5. Your existing "Add Book" function ---
+    async function handleBookSubmit(event, token) {
+        event.preventDefault(); 
+        
+        const form = event.target;
+        const submitButton = document.getElementById('submit-book-button');
+        
+        const bookData = {
+            title: form.elements.title.value,
+            author: form.elements.author.value,
+            isbn: form.elements.isbn.value,
+            genre: form.elements.genre.value,
+            publicationYear: parseInt(form.elements.publicationYear.value, 10),
+            quantity: parseInt(form.elements.quantity.value, 10),
+            price: parseFloat(form.elements.price.value),
+            originalPrice: parseFloat(form.elements.originalPrice.value)
+        };
+
+        if (!bookData.title || !bookData.author) {
+            alert("Please fill in at least Title and Author.");
+            return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.innerText = "Submitting...";
+
+        try {
+            const response = await fetch('http://localhost:8080/api/books', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(bookData)
+            });
+
+            if (!response.ok) {
+                let errorMsg = `Server error: ${response.status}`;
+                try {
+                    const error = await response.json();
+                    errorMsg = error.message || errorMsg;
+                } catch (e) { /* Ignore if response is not JSON */ }
+                throw new Error(errorMsg);
+            }
+
+            const savedBook = await response.json();
+            
+            console.log("Book saved successfully:", savedBook);
+            alert(`Success! "${savedBook.title}" has been added to the library.`);
+            form.reset(); // Clear the form
+            
+            // --- REFRESH THE TABLE ---
+            loadBooks(token);
+
+        } catch (error) {
+            console.error('Error adding book:', error);
+            alert(`Error: Could not add book. ${error.message}`);
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerText = "Add Book";
+        }
+    }
+</script>
+<!-- ▲▲▲ END OF REPLACEMENT SCRIPT BLOCK ▲▲▲ -->
+<!-- ▲▲▲ END OF REPLACEMENT SCRIPT BLOCK ▲▲▲ -->
 </body>
 </html>
+

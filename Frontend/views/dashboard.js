@@ -113,10 +113,14 @@ export function initializeDashboardView() {
     });
 
     // 2. Update the dashboard display placeholders
+    // At the bottom of initializeDashboardView()
     const emailDisplay = document.getElementById('user-email-display');
     const roleDisplay = document.getElementById('user-role-display');
     
-    // We access State through the global App object, which should be available here
-    if (emailDisplay) emailDisplay.innerText = window.App.State.userEmail;
-    if (roleDisplay) roleDisplay.innerText = window.App.State.userRole;
+    // Use the "State" we imported at the top of this file
+    if (emailDisplay) emailDisplay.innerText = State.userEmail;
+    if (roleDisplay) roleDisplay.innerText = State.userRole;
+    
+    // This call is correct
+
 }
