@@ -1,5 +1,6 @@
 package com.example.myproject.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -7,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "books") // This will create a "books" table in your database
+@Table(name = "books")
 public class Book {
 
     @Id
@@ -19,17 +20,19 @@ public class Book {
     private String isbn;
     private int publicationYear;
     private String genre;
-    private int quantity; // How many copies the library owns
+    private int quantity;
     private double price;
-private double originalPrice;
+    private double originalPrice;
+
+    // --- THIS IS THE NEW FIELD ---
+    @Column(length = 1024) // Allow for long paths/URLs
+    private String img;
 
     // A no-argument constructor is required by JPA
     public Book() {
     }
 
     // --- Getters and Setters ---
-    // (You can auto-generate these in VS Code by right-clicking,
-    // selecting "Source Action...", and then "Generate Getters and Setters...")
 
     public Long getId() {
         return id;
@@ -86,19 +89,29 @@ private double originalPrice;
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
+
     public double getPrice() {
-    return price;
-}
+        return price;
+    }
 
-public void setPrice(double price) {
-    this.price = price;
-}
+    public void setPrice(double price) {
+        this.price = price;
+    }
 
-public double getOriginalPrice() {
-    return originalPrice;
-}
+    public double getOriginalPrice() {
+        return originalPrice;
+    }
 
-public void setOriginalPrice(double originalPrice) {
-    this.originalPrice = originalPrice;
-}
+    public void setOriginalPrice(double originalPrice) {
+        this.originalPrice = originalPrice;
+    }
+
+    // --- THIS IS THE NEW GETTER/SETTER ---
+    public String getImg() {
+        return img;
+    }
+
+    public void setImg(String img) {
+        this.img = img;
+    }
 }
